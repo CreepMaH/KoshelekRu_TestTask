@@ -1,13 +1,13 @@
-﻿using KoshelekRu_TestTask.Domain.Interfaces;
-using KoshelekRu_TestTask.Domain.Models;
+﻿using TestTask.Domain.Interfaces;
+using TestTask.Domain.Models;
 
-namespace KoshelekRu_TestTask.Repository
+namespace TestTask.Repository
 {
     public class MessagePostgreSQL : IMessageDBRepository
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public Task<Message> GetByTime(TimeSpan timeInterval)
@@ -17,7 +17,8 @@ namespace KoshelekRu_TestTask.Repository
 
         public Task<OperationResult> Write(string message)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new OperationResult { IsSuccess = true });
+            //throw new NotImplementedException();
         }
     }
 }

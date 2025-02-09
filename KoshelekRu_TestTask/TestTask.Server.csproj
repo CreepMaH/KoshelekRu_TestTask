@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KoshelekRu_TestTask.Repository\KoshelekRu_TestTask.Repository.csproj" />
+    <ProjectReference Include="..\KoshelekRu_TestTask.Repository\TestTask.Repository.csproj" />
   </ItemGroup>
 
 </Project>

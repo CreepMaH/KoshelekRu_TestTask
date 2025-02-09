@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Message Sender";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #messageField {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #sendButton {
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>
+    <form method="post" asp-action="WriteMessage" controller="SendMessage">
+        <input type="text" name="message" id="messageField" maxlength="128" placeholder="Enter your message" required />
+        <input type="hidden" name="user" value="MessageSender" />
+        <button type="submit" id="sendButton">Send</button>
+    </form>
+</body>
+</html>
