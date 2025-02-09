@@ -1,9 +1,8 @@
-using KoshelekRu_TestTask.Domain.Interfaces;
-using KoshelekRu_TestTask.Repository;
-using KoshelekRu_TestTask.Services;
-using Scalar.AspNetCore;
+using TestTask.Domain.Interfaces;
+using TestTask.Repository;
+using TestTask.Services;
 
-namespace KoshelekRu_TestTask
+namespace TestTask
 {
     public class Program
     {
@@ -20,26 +19,19 @@ namespace KoshelekRu_TestTask
 
         private static void AddServices(WebApplicationBuilder builder)
         {
-            builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
+            builder.Services.AddCors();
             builder.Services.AddSignalR();
             builder.Services.AddTransient<IMessageDBRepository, MessagePostgreSQL>();
         }
 
         private static void ConfigureMiddleware(WebApplication app)
         {
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.MapScalarApiReference();
-            }
-
+            app.UseCors(options => options
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .WithOrigins("https://localhost:7103", "https://localhost:7063"));
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
-            app.MapControllers();
             app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);
         }
     }

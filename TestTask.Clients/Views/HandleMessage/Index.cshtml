@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Message Receiver";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #messages {
+            margin-top: 20px;
+        }
+
+        .message {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Сообщения SignalR</h1>
+    <div id="messages"></div>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7063/message-hub")
+            .build();
+
+        connection.on("Receive", (user, message) => {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("message");
+            msgDiv.textContent = user + ": " + message;
+            document.getElementById("messages").appendChild(msgDiv);
+        });
+
+        connection.start()
+            .then(() => console.log("Подключение к SignalR хабу установлено."))
+            .catch(err => console.error("Ошибка при подключении к SignalR хабу:", err));
+    </script>
+</body>
+</html>

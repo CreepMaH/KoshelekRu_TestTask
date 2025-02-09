@@ -1,4 +1,4 @@
-﻿namespace KoshelekRu_TestTask.Domain.Models
+﻿namespace TestTask.Domain.Models
 {
     public class OperationResult
     {

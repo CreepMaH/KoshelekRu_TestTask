@@ -1,6 +1,6 @@
-﻿using KoshelekRu_TestTask.Domain.Models;
+﻿using TestTask.Domain.Models;
 
-namespace KoshelekRu_TestTask.Domain.Interfaces
+namespace TestTask.Domain.Interfaces
 {
     public interface IMessageDBRepository : IDisposable
     {
