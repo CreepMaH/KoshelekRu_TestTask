@@ -2,16 +2,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TestTask.Clients.Controllers
 {
-    public class HandleMessageController : Controller
+    public class HandleMessageController(IConfiguration configuration) 
+        : Controller
     {
-        public HandleMessageController(IConfiguration configuration)
-        {
-            ViewData.Add("ReceiveMethodName", configuration["SignalR:ReceiveMethodName"]);
-            ViewData.Add("Endpoint", $"{configuration["SignalR:Endpoint"]}");
-        }
+        private readonly IConfiguration _configuration = configuration;
 
         public IActionResult Index()
         {
+            ViewData.Add("ReceiveMethodName", _configuration["SignalR:ReceiveMethodName"]);
+            ViewData.Add("ServerHost", $"{_configuration["SignalR:ServerHost"]}");
+            ViewData.Add("Endpoint", $"{_configuration["SignalR:Endpoint"]}");
+
             return View();
         }
     }

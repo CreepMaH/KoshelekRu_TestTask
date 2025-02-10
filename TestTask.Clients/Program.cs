@@ -24,8 +24,11 @@ namespace TestTask.Clients
             builder.Services.AddSingleton(serviceProvider =>
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<SignalRClient>>();
+
                 string hubEndpoint = builder.Configuration["SignalR:Endpoint"]!;
-                string hubUrl = $"https://localhost:7063{hubEndpoint}";
+                string hubHost = builder.Configuration["SignalR:ServerHost"]!;
+                string hubUrl = $"{hubHost}{hubEndpoint}";
+
                 string receiveMethodName = builder.Configuration["SignalR:ReceiveMethodName"]!;
 
                 var client = new SignalRClient(logger, hubUrl, receiveMethodName);
@@ -39,10 +42,6 @@ namespace TestTask.Clients
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
             }
 
             app.UseHttpsRedirection();
