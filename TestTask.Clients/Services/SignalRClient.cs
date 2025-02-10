@@ -2,33 +2,34 @@
 
 namespace TestTask.Clients.Services
 {
-    public class SignalRClient
+    public class SignalRClient(ILogger<SignalRClient> logger, string hubUrl, string receiveMethodName)
     {
-        private readonly HubConnection _connection;
-        private readonly string _receiveMethodName;
-
-        public SignalRClient(string hubUrl, string receiveMethodName)
-        {
-            _receiveMethodName = receiveMethodName;
-
-            _connection = new HubConnectionBuilder()
+        private readonly ILogger<SignalRClient> _logger = logger;
+        private readonly HubConnection _connection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
                 .Build();
+        private readonly string _receiveMethodName = receiveMethodName;
 
-            _connection.On<string, string>(_receiveMethodName, (user, message) =>
-            {
-                //_logger.LogInformation(message);
-            });
-        }
-
+        /// <summary>
+        /// Establishes connection with a SignalR hub.
+        /// </summary>
+        /// <returns></returns>
         public async Task StartAsync()
         {
             await _connection.StartAsync();
+            _logger.LogInformation("The SignalR client has been started.");
         }
 
+        /// <summary>
+        /// Sends a message via connection to the SignalR hub. Doesn't wait for response.
+        /// </summary>
+        /// <param name="user">Username</param>
+        /// <param name="message">Message</param>
+        /// <returns></returns>
         public async Task SendMessageAsync(string user, string message)
         {
-            await _connection.InvokeAsync(_receiveMethodName, user, message);
+            await _connection.SendAsync(_receiveMethodName, user, message);
+            _logger.LogTrace("Message has been sent.\r\nUser {user}. Message: {message}", user, message);
         }
     }
 }
