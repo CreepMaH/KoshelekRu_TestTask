@@ -1,0 +1,36 @@
+services:
+  postgresql:
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=koshelek.Ru@2025
+      - POSTGRES_USER=koshelek
+    networks:
+      - koshelek-network
+  testtask.server:
+    image: ${DOCKER_REGISTRY-}testtask-server
+    container_name: testtask-server
+    depends_on:
+      - postgresql
+    build:
+      context: .
+      dockerfile: TestTask.Server/Dockerfile
+    ports:
+      - "7063:8080"
+    networks:
+      - koshelek-network
+  testtask.clients:
+    image: ${DOCKER_REGISTRY-}testtask-clients
+    container_name: testtask-clients
+    depends_on:
+      - postgresql
+      - testtask.server
+    build:
+      context: .
+      dockerfile: TestTask.Clients/Dockerfile
+    ports:
+      - "7103:8080"
+    networks:
+      - koshelek-network

@@ -1,6 +1,6 @@
 using TestTask.Clients.Services;
 using TestTask.Domain.Interfaces;
-using TestTask.Repository;
+using TestTask.Repository.PostgreSQL;
 
 namespace TestTask.Clients
 {

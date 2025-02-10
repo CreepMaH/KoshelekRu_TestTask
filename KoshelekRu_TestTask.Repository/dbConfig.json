@@ -1,0 +1,5 @@
+{
+  "ConnectionString": "Host=your_host;Username=your_username;Password=your_password;Database=your_database",
+  "DbName": "KoshelekDB",
+  "MessagesTableName": "Messages"
+}

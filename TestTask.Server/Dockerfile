@@ -12,21 +12,21 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["TestTask.Clients/TestTask.Clients.csproj", "TestTask.Clients/"]
-COPY ["KoshelekRu_TestTask.Domain/TestTask.Domain.csproj", "KoshelekRu_TestTask.Domain/"]
+COPY ["TestTask.Server/TestTask.Server.csproj", "TestTask.Server/"]
 COPY ["KoshelekRu_TestTask.Repository/TestTask.Repository.csproj", "KoshelekRu_TestTask.Repository/"]
-RUN dotnet restore "./TestTask.Clients/TestTask.Clients.csproj"
+COPY ["KoshelekRu_TestTask.Domain/TestTask.Domain.csproj", "KoshelekRu_TestTask.Domain/"]
+RUN dotnet restore "./TestTask.Server/TestTask.Server.csproj"
 COPY . .
-WORKDIR "/src/TestTask.Clients"
-RUN dotnet build "./TestTask.Clients.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/TestTask.Server"
+RUN dotnet build "./TestTask.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Этот этап используется для публикации проекта службы, который будет скопирован на последний этап
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TestTask.Clients.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TestTask.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Этот этап используется в рабочей среде или при запуске из VS в обычном режиме (по умолчанию, когда конфигурация отладки не используется)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TestTask.Clients.dll"]
+ENTRYPOINT ["dotnet", "TestTask.Server.dll"]

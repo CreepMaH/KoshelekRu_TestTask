@@ -1,5 +1,5 @@
 using TestTask.Domain.Interfaces;
-using TestTask.Repository;
+using TestTask.Repository.PostgreSQL;
 using TestTask.Server.Services;
 
 namespace TestTask.Server
