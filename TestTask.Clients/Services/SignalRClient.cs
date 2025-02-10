@@ -1,7 +1,14 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using TestTask.Domain.Models;
 
 namespace TestTask.Clients.Services
 {
+    /// <summary>
+    /// Provides methods to communicate with SignalR hub.
+    /// </summary>
+    /// <param name="logger">Logger</param>
+    /// <param name="hubUrl">SignalR hub URL</param>
+    /// <param name="receiveMethodName">Hub method to handle messages</param>
     public class SignalRClient(ILogger<SignalRClient> logger, string hubUrl, string receiveMethodName)
     {
         private readonly ILogger<SignalRClient> _logger = logger;
@@ -26,10 +33,27 @@ namespace TestTask.Clients.Services
         /// <param name="user">Username</param>
         /// <param name="message">Message</param>
         /// <returns></returns>
-        public async Task SendMessageAsync(string user, string message)
+        public async Task<OperationResult> SendMessageAsync(string user, string message)
         {
+            if (_connection.State != HubConnectionState.Connected)
+            {
+                string errorMessage = $"The connection isn't alive: the state is \"{_connection.State}\". Operation has been aborted.";
+                _logger.LogError(errorMessage);
+
+                return new OperationResult
+                {
+                    IsSuccess = false,
+                    Message = errorMessage
+                };
+            }
+
             await _connection.SendAsync(_receiveMethodName, user, message);
             _logger.LogTrace("Message has been sent.\r\nUser {user}. Message: {message}", user, message);
+
+            return new OperationResult
+            {
+                IsSuccess = true
+            };
         }
     }
 }

@@ -12,6 +12,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            padding: 20px;
         }
 
         #messages {
@@ -25,14 +26,14 @@
     </style>
 </head>
 <body>
-    <h1>Сообщения SignalR</h1>
+    <h1>@ViewData["Title"]</h1>
     <div id="messages"></div>
     <script>
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7063/message-hub")
+            .withUrl('@ViewData["ServerHost"]@ViewData["Endpoint"]')
             .build();
 
-        connection.on("Receive", (user, message) => {
+        connection.on('@ViewData["ReceiveMethodName"]', (user, message) => {
             const msgDiv = document.createElement("div");
             msgDiv.classList.add("message");
             msgDiv.textContent = user + ": " + message;
@@ -40,8 +41,8 @@
         });
 
         connection.start()
-            .then(() => console.log("Подключение к SignalR хабу установлено."))
-            .catch(err => console.error("Ошибка при подключении к SignalR хабу:", err));
+            .then(() => console.log("Connestion to the SignalR hub was successfully established."))
+            .catch(err => console.error("An error occured while connecting to the signalR hub:", err));
     </script>
 </body>
 </html>
