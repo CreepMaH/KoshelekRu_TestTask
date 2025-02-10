@@ -21,12 +21,14 @@ namespace TestTask.Clients
         {
             builder.Services.AddControllersWithViews();
             builder.Services.AddTransient<IMessageDBRepository, MessagePostgreSQL>();
-            builder.Services.AddSingleton(service =>
+            builder.Services.AddSingleton(serviceProvider =>
             {
+                var logger = serviceProvider.GetRequiredService<ILogger<SignalRClient>>();
                 string hubEndpoint = builder.Configuration["SignalR:Endpoint"]!;
                 string hubUrl = $"https://localhost:7063{hubEndpoint}";
                 string receiveMethodName = builder.Configuration["SignalR:ReceiveMethodName"]!;
-                var client = new SignalRClient(hubUrl, receiveMethodName);
+
+                var client = new SignalRClient(logger, hubUrl, receiveMethodName);
                 client.StartAsync().GetAwaiter().GetResult();
                 return client;
             });

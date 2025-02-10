@@ -1,24 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using TestTask.Clients.Services;
-using TestTask.Domain.Interfaces;
 
 namespace TestTask.Clients.Controllers
 {
     [Route("[controller]")]
-    public class SendMessageController : Controller
+    public class SendMessageController(SignalRClient hubClient) 
+        : Controller
     {
-        private readonly IMessageDBRepository _messageDBRepo;
-        private readonly SignalRClient _hubClient;
-        private readonly string _receiveMethodName;
-
-        public SendMessageController(IMessageDBRepository messageDBRepo,
-            SignalRClient hubClient, IConfiguration configuration)
-        {
-            _messageDBRepo = messageDBRepo;
-            _hubClient = hubClient;
-            _receiveMethodName = configuration["SignalR:ReceiveMethodName"]!;
-        }
+        private readonly SignalRClient _hubClient = hubClient;
 
         public IActionResult Index()
         {
@@ -26,18 +15,10 @@ namespace TestTask.Clients.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> WriteMessage(string user, string message)
+        public async Task<IActionResult> SendMessage(string user, string message)
         {
-            var result = await _messageDBRepo.Write(message);
-
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result.Message);
-            }
-
             await _hubClient.SendMessageAsync(user, message);
-
-            return Ok(result.Message);
+            return Ok("The message has been sent.");
         }
     }
 }
