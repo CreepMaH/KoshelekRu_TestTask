@@ -9,9 +9,9 @@ namespace TestTask.Repository.PostgreSQL
     {
         private const string CONFIG_FILE_NAME = "dbConfig.json";
 
-        private NpgsqlConnection _connection;
-        private string _dbName;
-        private string _messagesTableName;
+        private NpgsqlConnection? _connection;
+        private string? _dbName;
+        private string? _messagesTableName;
 
         public void InitConnection()
         {
@@ -45,7 +45,7 @@ namespace TestTask.Repository.PostgreSQL
             string commandText = $"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
                 $"VALUES ({message.IndexNumber}, {message.Text}, {message.TimeStamp})"; //TODO: Переписать на параметры
 
-            await _connection.OpenAsync();
+            await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
             using var sqlDataReader = await command.ExecuteReaderAsync();
 
@@ -79,7 +79,7 @@ namespace TestTask.Repository.PostgreSQL
                     AND table_name = {_messagesTableName}
                 );";    //TODO: Переписать на параметры
 
-            await _connection.OpenAsync();
+            await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
             bool exists = (bool)(await command.ExecuteScalarAsync() ?? false);
             await _connection.CloseAsync();
@@ -96,7 +96,7 @@ namespace TestTask.Repository.PostgreSQL
                     Text CHARACTER VARYING(128), 
                     TimeStamp TIMESTAMP)";  //TODO: Переписать на параметры
 
-            await _connection.OpenAsync();
+            await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
             _ = await command.ExecuteNonQueryAsync();
             await _connection.CloseAsync();

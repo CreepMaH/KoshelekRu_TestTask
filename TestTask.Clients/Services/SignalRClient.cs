@@ -31,9 +31,9 @@ namespace TestTask.Clients.Services
         /// Sends a message via connection to the SignalR hub. Doesn't wait for response.
         /// </summary>
         /// <param name="user">Username</param>
-        /// <param name="message">Message</param>
+        /// <param name="jsonMessage">Message</param>
         /// <returns></returns>
-        public async Task<OperationResult> SendMessageAsync(string user, string message)
+        public async Task<OperationResult> SendMessageAsync(string user, string jsonMessage)
         {
             if (_connection.State != HubConnectionState.Connected)
             {
@@ -47,8 +47,8 @@ namespace TestTask.Clients.Services
                 };
             }
 
-            await _connection.SendAsync(_receiveMethodName, user, message);
-            _logger.LogTrace("Message has been sent.\r\nUser {user}. Message: {message}", user, message);
+            await _connection.SendAsync(_receiveMethodName, user, jsonMessage);
+            _logger.LogTrace("Message has been sent.\r\nUser {user}. Message: {message}", user, jsonMessage);
 
             return new OperationResult
             {

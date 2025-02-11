@@ -21,7 +21,13 @@ namespace TestTask.Server
         {
             builder.Services.AddCors();
             builder.Services.AddSignalR();
-            builder.Services.AddTransient<IMessageDBRepository, MessagePostgreSQL>();
+
+            builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
+            builder.Services.AddSingleton<IMessageDBRepository>(serviceProvider =>
+            {
+                var messageBuilder = serviceProvider.GetRequiredService<IMessageDBRepositoryBuilder<IMessageDBRepository>>();
+                return messageBuilder.Build().GetAwaiter().GetResult();
+            });
         }
         private static void ConfigureMiddleware(WebApplication app)
         {
@@ -30,6 +36,7 @@ namespace TestTask.Server
                 .AllowAnyMethod()
                 .AllowCredentials()
                 .WithOrigins("https://localhost:7103", "https://localhost:7063")
+                //.WithOrigins(app.Configuration["SignalR:CorsAllowedOrigins"]!)
                 );
             app.UseHttpsRedirection();
             app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);

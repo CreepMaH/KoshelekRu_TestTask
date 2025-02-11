@@ -1,5 +1,5 @@
 {
-  "ConnectionString": "Host=your_host;Username=your_username;Password=your_password;Database=your_database",
+  "ConnectionString": "Host=localhost:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=KoshelekDB",
   "DbName": "KoshelekDB",
   "MessagesTableName": "Messages"
 }

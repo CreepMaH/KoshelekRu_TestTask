@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Text;
+using TestTask.Domain.Extensions;
 using TestTask.Domain.Interfaces;
+using TestTask.Domain.Models;
 
 namespace TestTask.Server.Services
 {
@@ -15,11 +17,14 @@ namespace TestTask.Server.Services
         /// A message handler. Saves message to DB and resends it to clients.
         /// </summary>
         /// <param name="user">User</param>
-        /// <param name="message">Message</param>
+        /// <param name="jsonMessage">Message</param>
         /// <returns></returns>
-        public async Task HandleMessage(string user, string message)
+        public async Task HandleMessage(string user, string jsonMessage)
         {
-            _logger.LogTrace("Message received.\r\nUser: {user}. Text: {message}.", user, message);
+            _logger.LogTrace("Message received.\r\nUser: {user}. Text: {message}.", user, jsonMessage);
+
+            Message message = jsonMessage.JsonStringToMessage();
+            message.TimeStamp = DateTime.Now;
 
             var result = await _dBRepository.Write(message);
             if (!result.IsSuccess)
@@ -27,7 +32,7 @@ namespace TestTask.Server.Services
                 _logger.LogError("An error occured while saving to DB. Text: {errorMessage}", result.Message);
             }
 
-            await Clients.All.SendAsync(_receiveMethodName, user, message);
+            await Clients.All.SendAsync(_receiveMethodName, user, jsonMessage);
         }
 
         public override Task OnConnectedAsync()
