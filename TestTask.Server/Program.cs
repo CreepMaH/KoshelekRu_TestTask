@@ -35,10 +35,10 @@ namespace TestTask.Server
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
-                .WithOrigins("https://localhost:7103", "https://localhost:7063")
+                .WithOrigins("testtask-server:7103", "testtask-clients:7063")
                 //.WithOrigins(app.Configuration["SignalR:CorsAllowedOrigins"]!)
                 );
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);
         }
     }

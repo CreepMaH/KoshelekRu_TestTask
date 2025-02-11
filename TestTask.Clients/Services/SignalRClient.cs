@@ -13,8 +13,8 @@ namespace TestTask.Clients.Services
     {
         private readonly ILogger<SignalRClient> _logger = logger;
         private readonly HubConnection _connection = new HubConnectionBuilder()
-                .WithUrl(hubUrl)
-                .Build();
+            .WithUrl($"http://{hubUrl}")
+            .Build();
         private readonly string _receiveMethodName = receiveMethodName;
 
         /// <summary>

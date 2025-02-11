@@ -7,14 +7,29 @@ namespace TestTask.Repository.PostgreSQL
 {
     internal class MessagePostgreSQL : IMessageDBRepository
     {
-        private const string CONFIG_FILE_NAME = "dbConfig.json";
+        private readonly string _configFileName = "";//Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Repository", "dbConfig.json");
 
         private NpgsqlConnection? _connection;
-        private string? _dbName;
-        private string? _messagesTableName;
+        private string? _dbName = "koshelekdb";
+        private string? _messagesTableName = "messages";
+
+        public async Task InitDB()
+        {
+            if (!await CheckIfDbExists())
+            {
+                await CreateDb();
+            }
+            if (!await CheckIfMessagesTableExists())
+            {
+                await CreateMessagesTable();
+            }
+        }
 
         public void InitConnection()
         {
+            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
+            return;
+
             var configs = GetConfigs();
 
             _dbName = configs?["DbName"]
@@ -27,14 +42,6 @@ namespace TestTask.Repository.PostgreSQL
             _connection = new NpgsqlConnection(connectionString);
         }
 
-        public async Task InitDB()
-        {
-            if (!await CheckIfMessagesTableExists())
-            {
-                await CreateDbWithMessagesTable();
-            }
-        }
-
         public Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval)
         {
             throw new NotImplementedException();
@@ -42,8 +49,8 @@ namespace TestTask.Repository.PostgreSQL
 
         public async Task<OperationResult> Write(Message message)
         {
-            string commandText = $"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
-                $"VALUES ({message.IndexNumber}, {message.Text}, {message.TimeStamp})"; //TODO: Переписать на параметры
+            string commandText = @$"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
+                @$"VALUES ({message.IndexNumber}, '{message.Text}', {message.TimeStamp})"; //TODO: Переписать на параметры
 
             await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
@@ -65,31 +72,89 @@ namespace TestTask.Repository.PostgreSQL
 
         private Dictionary<string, string>? GetConfigs()
         {
-            string json = File.ReadAllText(CONFIG_FILE_NAME);
+            string json = File.ReadAllText(_configFileName);
             return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+        }
+
+        private async Task<bool> CheckIfDbExists()
+        {
+            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+
+            string commandText = @$"
+                SELECT EXISTS(
+                    SELECT 1 
+                    FROM pg_database 
+                    WHERE datname = '{_dbName}'
+                );";    //TODO: Переписать на параметры
+
+            try
+            {
+                await _connection!.OpenAsync();
+
+                using NpgsqlCommand command = CreateSqlCommand(commandText);
+                using var reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    bool dbExists = reader.GetBoolean(0);
+                    return dbExists;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
         }
 
         private async Task<bool> CheckIfMessagesTableExists()
         {
+            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
+
             string commandText = @$"
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'public' 
-                    AND table_name = {_messagesTableName}
-                );";    //TODO: Переписать на параметры
+                SELECT 1 
+                FROM {_messagesTableName};";    //TODO: Переписать на параметры
+
+            try
+            {
+                await _connection!.OpenAsync();
+                using NpgsqlCommand command = CreateSqlCommand(commandText);
+                await command.ExecuteNonQueryAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
+        }
+
+        private async Task CreateDb()
+        {
+            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+
+            string commandText = @$"CREATE DATABASE {_dbName};";  //TODO: Переписать на параметры
 
             await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
-            bool exists = (bool)(await command.ExecuteScalarAsync() ?? false);
+            _ = await command.ExecuteNonQueryAsync();
             await _connection.CloseAsync();
-
-            return exists;
         }
 
-        private async Task CreateDbWithMessagesTable()
+        private async Task CreateMessagesTable()
         {
-            string commandText = @$"CREATE DATABASE {_dbName};
+            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
+
+            string commandText = $@"
                 CREATE TABLE {_messagesTableName}(
                     Id BIGSERIAL PRIMARY KEY,
                     IndexNumber BIGINT, 

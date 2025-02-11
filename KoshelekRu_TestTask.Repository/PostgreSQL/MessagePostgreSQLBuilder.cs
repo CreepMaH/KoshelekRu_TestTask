@@ -7,8 +7,8 @@ namespace TestTask.Repository.PostgreSQL
         public async Task<IMessageDBRepository> Build()
         {
             var postgreRepository = new MessagePostgreSQL();
-            postgreRepository.InitConnection();
             await postgreRepository.InitDB();
+            postgreRepository.InitConnection();
 
             return postgreRepository;
         }
