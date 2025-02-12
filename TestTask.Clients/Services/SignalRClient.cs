@@ -11,9 +11,10 @@ namespace TestTask.Clients.Services
     /// <param name="receiveMethodName">Hub method to handle messages</param>
     public class SignalRClient(ILogger<SignalRClient> logger, string hubUrl, string receiveMethodName)
     {
+        
         private readonly ILogger<SignalRClient> _logger = logger;
         private readonly HubConnection _connection = new HubConnectionBuilder()
-            .WithUrl($"http://{hubUrl}")
+            .WithUrl($"{hubUrl}")
             .Build();
         private readonly string _receiveMethodName = receiveMethodName;
 
@@ -48,7 +49,7 @@ namespace TestTask.Clients.Services
             }
 
             await _connection.SendAsync(_receiveMethodName, user, jsonMessage);
-            _logger.LogTrace("Message has been sent.\r\nUser {user}. Message: {message}", user, jsonMessage);
+            _logger.LogInformation("Message has been sent.\r\nUser {user}. Message: {message}", user, jsonMessage);
 
             return new OperationResult
             {

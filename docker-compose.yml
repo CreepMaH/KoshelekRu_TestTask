@@ -31,7 +31,7 @@ services:
       context: .
       dockerfile: TestTask.Clients/Dockerfile
     ports:
-      - "7103:8081"
+      - "7103:8080"
     networks:
       - koshelek-network
 networks:

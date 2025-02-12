@@ -7,7 +7,7 @@ namespace TestTask.Repository.PostgreSQL
 {
     internal class MessagePostgreSQL : IMessageDBRepository
     {
-        private readonly string _configFileName = "";//Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Repository", "dbConfig.json");
+        private readonly string _configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dbConfig.json");
 
         private NpgsqlConnection? _connection;
         private string? _dbName = "koshelekdb";
@@ -27,8 +27,8 @@ namespace TestTask.Repository.PostgreSQL
 
         public void InitConnection()
         {
-            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
-            return;
+            //_connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
+            //return;
 
             var configs = GetConfigs();
 
@@ -50,7 +50,7 @@ namespace TestTask.Repository.PostgreSQL
         public async Task<OperationResult> Write(Message message)
         {
             string commandText = @$"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
-                @$"VALUES ({message.IndexNumber}, '{message.Text}', {message.TimeStamp})"; //TODO: Переписать на параметры
+                @$"VALUES ({message.IndexNumber}, '{message.Text}', '{message.TimeStamp}')"; //TODO: Переписать на параметры
 
             await _connection!.OpenAsync();
             using NpgsqlCommand command = CreateSqlCommand(commandText);
@@ -65,6 +65,7 @@ namespace TestTask.Repository.PostgreSQL
                 Message = $"The command has been executed with {sqlDataReader.RecordsAffected} rows affected"
             };
         }
+
         public void Dispose()
         {
             //throw new NotImplementedException();
@@ -72,6 +73,7 @@ namespace TestTask.Repository.PostgreSQL
 
         private Dictionary<string, string>? GetConfigs()
         {
+            
             string json = File.ReadAllText(_configFileName);
             return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
         }

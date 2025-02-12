@@ -31,14 +31,16 @@ namespace TestTask.Server
         }
         private static void ConfigureMiddleware(WebApplication app)
         {
+            string[] allowedOrigins = app.Configuration.GetSection("SignalR:CorsAllowedOrigins")
+                .Get<string[]>()!;
+
             app.UseCors(options => options
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
-                .WithOrigins("testtask-server:7103", "testtask-clients:7063")
-                //.WithOrigins(app.Configuration["SignalR:CorsAllowedOrigins"]!)
+                .WithOrigins(allowedOrigins)
                 );
-            //app.UseHttpsRedirection();
+
             app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);
         }
     }

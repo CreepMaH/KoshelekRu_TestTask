@@ -1,5 +1,5 @@
 {
-  "ConnectionString": "Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=KoshelekDB",
-  "DbName": "KoshelekDB",
-  "MessagesTableName": "Messages"
+  "ConnectionString": "Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb",
+  "DbName": "koshelekdb",
+  "MessagesTableName": "messages"
 }

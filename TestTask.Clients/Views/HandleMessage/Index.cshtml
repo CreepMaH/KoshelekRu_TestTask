@@ -30,13 +30,15 @@
     <div id="messages"></div>
     <script>
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl('@ViewData["ServerHost"]@ViewData["Endpoint"]')
+            .withUrl('@ViewData["ServerHostOuter"]@ViewData["Endpoint"]')
             .build();
 
         connection.on('@ViewData["ReceiveMethodName"]', (user, message) => {
+            const jsonMessage = JSON.parse(message);
+
             const msgDiv = document.createElement("div");
             msgDiv.classList.add("message");
-            msgDiv.textContent = user + ": " + message;
+            msgDiv.textContent = user + ": " + jsonMessage.Text;
             document.getElementById("messages").appendChild(msgDiv);
         });
 

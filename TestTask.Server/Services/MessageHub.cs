@@ -21,23 +21,28 @@ namespace TestTask.Server.Services
         /// <returns></returns>
         public async Task HandleMessage(string user, string jsonMessage)
         {
-            _logger.LogTrace("Message received.\r\nUser: {user}. Text: {message}.", user, jsonMessage);
+            _logger.LogInformation("Message received.\r\nUser: {user}. Text: {message}.", user, jsonMessage);
 
             Message message = jsonMessage.JsonStringToMessage();
             message.TimeStamp = DateTime.Now;
 
             var result = await _dBRepository.Write(message);
-            if (!result.IsSuccess)
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation("Message {IndexNumber} has been saved in DB.", message.IndexNumber);
+            }
+            else
             {
                 _logger.LogError("An error occured while saving to DB. Text: {errorMessage}", result.Message);
             }
 
-            await Clients.All.SendAsync(_receiveMethodName, user, jsonMessage);
+            await Clients.All.SendAsync(_receiveMethodName, user, message.ToJsonString());
+            _logger.LogInformation("Message {IndexNumber} has been sent to clients.", message.IndexNumber);
         }
 
         public override Task OnConnectedAsync()
         {
-            _logger.LogTrace("A new client has connected. Connection ID: {connectionId}", Context.ConnectionId);
+            _logger.LogInformation("A new client has connected. Connection ID: {connectionId}", Context.ConnectionId);
             return Task.CompletedTask;
         }
 
@@ -51,9 +56,10 @@ namespace TestTask.Server.Services
             }
 
             stringBuilder.Append($". Connection ID: {Context.ConnectionId}.");
-            string message = stringBuilder.ToString();
 
-            _logger.LogTrace(message);
+            string message = stringBuilder.ToString();
+            _logger.LogInformation(message);
+
             return Task.CompletedTask;
         }
     }
