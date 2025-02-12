@@ -1,4 +1,5 @@
-﻿using TestTask.Domain.Interfaces;
+﻿using TestTask.Configuration.Services;
+using TestTask.Domain.Interfaces;
 
 namespace TestTask.Repository.PostgreSQL
 {
@@ -6,9 +7,11 @@ namespace TestTask.Repository.PostgreSQL
     {
         public async Task<IMessageDBRepository> Build()
         {
-            var postgreRepository = new MessagePostgreSQL();
+            var appSettings = new AppSettingsService();
+            var postgreRepository = new MessagePostgreSQL(appSettings);
+
+            postgreRepository.LoadAppSettings();
             await postgreRepository.InitDB();
-            postgreRepository.InitConnection();
 
             return postgreRepository;
         }

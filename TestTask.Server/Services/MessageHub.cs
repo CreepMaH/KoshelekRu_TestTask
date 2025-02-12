@@ -6,10 +6,12 @@ using TestTask.Domain.Models;
 
 namespace TestTask.Server.Services
 {
-    public class MessageHub(ILogger<MessageHub> logger, IConfiguration configuration, IMessageDBRepository dBRepository)
+    public class MessageHub(ILogger<MessageHub> logger, IAppSettings configuration, IMessageDBRepository dBRepository)
         : Hub
     {
-        private readonly string _receiveMethodName = configuration["SignalR:ReceiveMethodName"]!;
+        private readonly string _receiveMethodName = configuration.GetAppSettings()
+            .SignalRSettings!
+            .ReceiveMethodName!;
         private readonly ILogger<MessageHub> _logger = logger;
         private readonly IMessageDBRepository _dBRepository = dBRepository;
 

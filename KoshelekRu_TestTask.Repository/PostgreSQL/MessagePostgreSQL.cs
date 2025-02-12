@@ -1,17 +1,28 @@
 ﻿using Npgsql;
-using System.Text.Json;
 using TestTask.Domain.Interfaces;
 using TestTask.Domain.Models;
 
 namespace TestTask.Repository.PostgreSQL
 {
-    internal class MessagePostgreSQL : IMessageDBRepository
+    internal class MessagePostgreSQL(IAppSettings appSettings) : IMessageDBRepository
     {
-        private readonly string _configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dbConfig.json");
+        private readonly IAppSettings _appSettings = appSettings;
 
-        private NpgsqlConnection? _connection;
-        private string? _dbName = "koshelekdb";
-        private string? _messagesTableName = "messages";
+        private string? _connectionString;
+        private string? _dbName;
+        private string? _messagesTableName;
+
+        public void LoadAppSettings()
+        {
+            var settings = _appSettings.GetAppSettings();
+
+            _connectionString = settings.DBConfig?.ConnectionString
+                ?? throw new ArgumentNullException(nameof(_connectionString));
+            _dbName = settings.DBConfig?.DBName
+                ?? throw new ArgumentNullException(nameof(_dbName));
+            _messagesTableName = settings.DBConfig.MessagesTableName
+                ?? throw new ArgumentNullException(nameof(_messagesTableName));
+        }
 
         public async Task InitDB()
         {
@@ -25,23 +36,6 @@ namespace TestTask.Repository.PostgreSQL
             }
         }
 
-        public void InitConnection()
-        {
-            //_connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
-            //return;
-
-            var configs = GetConfigs();
-
-            _dbName = configs?["DbName"]
-                ?? throw new ArgumentNullException(nameof(_dbName));
-            _messagesTableName = configs?["MessagesTableName"]
-                ?? throw new ArgumentNullException(nameof(_messagesTableName));
-
-            string connectionString = configs?["ConnectionString"]
-                ?? throw new ArgumentNullException(nameof(connectionString));
-            _connection = new NpgsqlConnection(connectionString);
-        }
-
         public Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval)
         {
             throw new NotImplementedException();
@@ -49,15 +43,15 @@ namespace TestTask.Repository.PostgreSQL
 
         public async Task<OperationResult> Write(Message message)
         {
+            using NpgsqlConnection conn = new(_connectionString);
+            await conn!.OpenAsync();
+
             string commandText = @$"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
                 @$"VALUES ({message.IndexNumber}, '{message.Text}', '{message.TimeStamp}')"; //TODO: Переписать на параметры
-
-            await _connection!.OpenAsync();
-            using NpgsqlCommand command = CreateSqlCommand(commandText);
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             using var sqlDataReader = await command.ExecuteReaderAsync();
 
             bool isSuccess = sqlDataReader.RecordsAffected > 0;
-            await _connection.CloseAsync();
 
             return new OperationResult
             {
@@ -71,16 +65,10 @@ namespace TestTask.Repository.PostgreSQL
             //throw new NotImplementedException();
         }
 
-        private Dictionary<string, string>? GetConfigs()
-        {
-            
-            string json = File.ReadAllText(_configFileName);
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-        }
-
         private async Task<bool> CheckIfDbExists()
         {
-            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            await conn!.OpenAsync();
 
             string commandText = @$"
                 SELECT EXISTS(
@@ -88,45 +76,31 @@ namespace TestTask.Repository.PostgreSQL
                     FROM pg_database 
                     WHERE datname = '{_dbName}'
                 );";    //TODO: Переписать на параметры
-
-            try
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                await _connection!.OpenAsync();
-
-                using NpgsqlCommand command = CreateSqlCommand(commandText);
-                using var reader = await command.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    bool dbExists = reader.GetBoolean(0);
-                    return dbExists;
-                }
-                else
-                {
-                    return false;
-                }
+                bool dbExists = reader.GetBoolean(0);
+                return dbExists;
             }
-            catch
+            else
             {
                 return false;
-            }
-            finally
-            {
-                await _connection.CloseAsync();
             }
         }
 
         private async Task<bool> CheckIfMessagesTableExists()
         {
-            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
-
-            string commandText = @$"
-                SELECT 1 
-                FROM {_messagesTableName};";    //TODO: Переписать на параметры
-
             try
             {
-                await _connection!.OpenAsync();
-                using NpgsqlCommand command = CreateSqlCommand(commandText);
+                using NpgsqlConnection conn = new(_connectionString);
+                await conn!.OpenAsync();
+
+                string commandText = @$"
+                    SELECT 1 
+                    FROM {_messagesTableName};";    //TODO: Переписать на параметры
+
+                using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
                 await command.ExecuteNonQueryAsync();
                 return true;
             }
@@ -134,27 +108,23 @@ namespace TestTask.Repository.PostgreSQL
             {
                 return false;
             }
-            finally
-            {
-                await _connection.CloseAsync();
-            }
         }
 
         private async Task CreateDb()
         {
-            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            await conn!.OpenAsync();
 
             string commandText = @$"CREATE DATABASE {_dbName};";  //TODO: Переписать на параметры
 
-            await _connection!.OpenAsync();
-            using NpgsqlCommand command = CreateSqlCommand(commandText);
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             _ = await command.ExecuteNonQueryAsync();
-            await _connection.CloseAsync();
         }
 
         private async Task CreateMessagesTable()
         {
-            _connection = new NpgsqlConnection("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb");
+            using NpgsqlConnection conn = new(_connectionString);
+            await conn!.OpenAsync();
 
             string commandText = $@"
                 CREATE TABLE {_messagesTableName}(
@@ -163,17 +133,15 @@ namespace TestTask.Repository.PostgreSQL
                     Text CHARACTER VARYING(128), 
                     TimeStamp TIMESTAMP)";  //TODO: Переписать на параметры
 
-            await _connection!.OpenAsync();
-            using NpgsqlCommand command = CreateSqlCommand(commandText);
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             _ = await command.ExecuteNonQueryAsync();
-            await _connection.CloseAsync();
         }
 
-        private NpgsqlCommand CreateSqlCommand(string commandText)
+        private NpgsqlCommand CreateSqlCommand(string commandText, NpgsqlConnection connection)
         {
             NpgsqlCommand command = new()
             {
-                Connection = _connection,
+                Connection = connection,
                 CommandType = System.Data.CommandType.Text,
                 CommandText = commandText
             };

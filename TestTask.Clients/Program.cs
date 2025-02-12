@@ -1,4 +1,6 @@
 using TestTask.Clients.Services;
+using TestTask.Configuration.Services;
+using TestTask.Domain.Interfaces;
 
 namespace TestTask.Clients
 {
@@ -18,18 +20,22 @@ namespace TestTask.Clients
         private static void AddServices(WebApplicationBuilder builder)
         {
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSingleton<IAppSettings, AppSettingsService>();
             builder.Services.AddSingleton(serviceProvider =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<SignalRClient>>();
+                var configs = serviceProvider.GetRequiredService<IAppSettings>()
+                    .GetAppSettings();
 
-                string hubEndpoint = builder.Configuration["SignalR:Endpoint"]!;
-                string hubHost = builder.Configuration["SignalR:ServerHost"]!;
+                string hubEndpoint = configs.SignalRSettings!.Endpoint!;
+                string hubHost = configs.SignalRSettings!.ServerHostInDockerNetwork!;
                 string hubUrl = $"{hubHost}{hubEndpoint}";
 
-                string receiveMethodName = builder.Configuration["SignalR:ReceiveMethodName"]!;
+                string receiveMethodName = configs.SignalRSettings!.ReceiveMethodName!;
 
+                var logger = serviceProvider.GetRequiredService<ILogger<SignalRClient>>();
                 var client = new SignalRClient(logger, hubUrl, receiveMethodName);
                 client.StartAsync().GetAwaiter().GetResult();
+
                 return client;
             });
         }
@@ -41,7 +47,6 @@ namespace TestTask.Clients
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseHttpsRedirection();
             app.UseRouting();
 
             app.MapStaticAssets();

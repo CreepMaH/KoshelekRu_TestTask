@@ -1,3 +1,4 @@
+using TestTask.Configuration.Services;
 using TestTask.Domain.Interfaces;
 using TestTask.Repository.PostgreSQL;
 using TestTask.Server.Services;
@@ -22,6 +23,7 @@ namespace TestTask.Server
             builder.Services.AddCors();
             builder.Services.AddSignalR();
 
+            builder.Services.AddSingleton<IAppSettings, AppSettingsService>();
             builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
             builder.Services.AddSingleton<IMessageDBRepository>(serviceProvider =>
             {
@@ -31,8 +33,10 @@ namespace TestTask.Server
         }
         private static void ConfigureMiddleware(WebApplication app)
         {
-            string[] allowedOrigins = app.Configuration.GetSection("SignalR:CorsAllowedOrigins")
-                .Get<string[]>()!;
+            var configs = app.Services.GetRequiredService<IAppSettings>()
+                .GetAppSettings();
+
+            string[] allowedOrigins = configs.SignalRSettings!.CorsAllowedOrigins!;
 
             app.UseCors(options => options
                 .AllowAnyHeader()
@@ -41,7 +45,7 @@ namespace TestTask.Server
                 .WithOrigins(allowedOrigins)
                 );
 
-            app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);
+            app.MapHub<MessageHub>(configs.SignalRSettings!.Endpoint!);
         }
     }
 }
