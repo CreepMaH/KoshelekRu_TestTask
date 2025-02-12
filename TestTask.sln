@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Clients", "TestTas
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Configuration", "..\TestTask.Configuration\TestTask.Configuration.csproj", "{625B844F-71C0-4C19-ACEA-67B18D6A9AD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Configuration", "TestTask.Configuration\TestTask.Configuration.csproj", "{625B844F-71C0-4C19-ACEA-67B18D6A9AD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

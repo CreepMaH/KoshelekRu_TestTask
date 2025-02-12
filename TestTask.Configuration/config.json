@@ -1,0 +1,18 @@
+{
+  "DBConfig": {
+    "ConnectionString": "Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=koshelekdb",
+    "DBName": "koshelekdb",
+    "MessagesTableName": "messages"
+  },
+  "SignalRSettings": {
+    "ServerHostInDockerNetwork": "http://testtask-server:8080",
+    "ServerHostInPublicNetwork": "http://localhost:7063",
+    "CorsAllowedOrigins": [
+      "http://testtask-server:7063",
+      "http://localhost:7103",
+      "http://testtask-clients:7103"
+    ],
+    "Endpoint": "/message-hub",
+    "ReceiveMethodName": "HandleMessage"
+  }
+}

@@ -1,18 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
+using TestTask.Domain.Interfaces;
 
 namespace TestTask.Clients.Controllers
 {
-    public class HandleMessageController(IConfiguration configuration) 
+    public class HandleMessageController(IAppSettings appSettings) 
         : Controller
     {
-        private readonly IConfiguration _configuration = configuration;
+        private readonly IAppSettings _configuration = appSettings;
 
         public IActionResult Index()
         {
-            ViewData.Add("ReceiveMethodName", _configuration["SignalR:ReceiveMethodName"]);
-            ViewData.Add("ServerHost", $"{_configuration["SignalR:ServerHost"]}");
-            ViewData.Add("ServerHostOuter", $"{_configuration["SignalR:ServerHostOuter"]}");
-            ViewData.Add("Endpoint", $"{_configuration["SignalR:Endpoint"]}");
+            var configs = _configuration.GetAppSettings();
+
+            ViewData.Add("ReceiveMethodName", configs.SignalRSettings!.ReceiveMethodName);
+            ViewData.Add("ServerHost", configs.SignalRSettings.ServerHostInDockerNetwork);
+            ViewData.Add("ServerHostOuter", configs.SignalRSettings.ServerHostInPublicNetwork);
+            ViewData.Add("Endpoint", configs.SignalRSettings.Endpoint);
 
             return View();
         }
