@@ -34,7 +34,7 @@
 <body>
     <h1>@ViewData["Title"]</h1>
     <form method="post" asp-action="SendMessage" controller="SendMessage">
-        <input type="text" name="message" id="messageField" maxlength="128" placeholder="Enter your message" required />
+        <input type="text" name="messageText" id="messageField" maxlength="128" placeholder="Enter your message" required />
         <input type="hidden" name="user" value="MessageSender" />
         <button type="submit" id="sendButton">Send</button>
         <div id="sending-status">@TempData["SendingResult"]</div>

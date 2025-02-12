@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TestTask.Clients.Services;
+using TestTask.Domain.Extensions;
+using TestTask.Domain.Models;
 
 namespace TestTask.Clients.Controllers
 {
@@ -11,6 +13,7 @@ namespace TestTask.Clients.Controllers
     public class SendMessageController(SignalRClient hubClient) 
         : Controller
     {
+        private static ulong messagesCount = 0;
         private readonly SignalRClient _hubClient = hubClient;
 
         /// <summary>
@@ -26,15 +29,21 @@ namespace TestTask.Clients.Controllers
         /// Sends a message to message service. Redirects to an original view with a sending result.
         /// </summary>
         /// <param name="user">Username</param>
-        /// <param name="message">Message</param>
+        /// <param name="messageText">Message</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> SendMessage(string user, string message)
+        public async Task<IActionResult> SendMessage(string user, string messageText)
         {
-            var result =  await _hubClient.SendMessageAsync(user, message);
+            string jsonMessage = new Message
+            {
+                Text = messageText,
+                IndexNumber = ++messagesCount
+            }.ToJsonString();
+
+            var result =  await _hubClient.SendMessageAsync(user, jsonMessage);
 
             string sendingResult = result.IsSuccess 
-                ? $"Message \"{message}\" has been successfully sended"
+                ? $"Message \"{messageText}\" has been successfully sended"
                 : $"An error occured while sending. Text: {result.Message}";
 
             TempData["SendingResult"] = sendingResult;

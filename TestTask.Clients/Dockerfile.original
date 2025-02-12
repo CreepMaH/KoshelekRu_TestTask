@@ -13,8 +13,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["TestTask.Clients/TestTask.Clients.csproj", "TestTask.Clients/"]
-COPY ["KoshelekRu_TestTask.Domain/TestTask.Domain.csproj", "KoshelekRu_TestTask.Domain/"]
-COPY ["KoshelekRu_TestTask.Repository/TestTask.Repository.csproj", "KoshelekRu_TestTask.Repository/"]
 RUN dotnet restore "./TestTask.Clients/TestTask.Clients.csproj"
 COPY . .
 WORKDIR "/src/TestTask.Clients"

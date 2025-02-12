@@ -1,5 +1,5 @@
 using TestTask.Domain.Interfaces;
-using TestTask.Repository;
+using TestTask.Repository.PostgreSQL;
 using TestTask.Server.Services;
 
 namespace TestTask.Server
@@ -21,17 +21,26 @@ namespace TestTask.Server
         {
             builder.Services.AddCors();
             builder.Services.AddSignalR();
-            builder.Services.AddTransient<IMessageDBRepository, MessagePostgreSQL>();
+
+            builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
+            builder.Services.AddSingleton<IMessageDBRepository>(serviceProvider =>
+            {
+                var messageBuilder = serviceProvider.GetRequiredService<IMessageDBRepositoryBuilder<IMessageDBRepository>>();
+                return messageBuilder.Build().GetAwaiter().GetResult();
+            });
         }
         private static void ConfigureMiddleware(WebApplication app)
         {
+            string[] allowedOrigins = app.Configuration.GetSection("SignalR:CorsAllowedOrigins")
+                .Get<string[]>()!;
+
             app.UseCors(options => options
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
-                .WithOrigins("https://localhost:7103", "https://localhost:7063")
+                .WithOrigins(allowedOrigins)
                 );
-            app.UseHttpsRedirection();
+
             app.MapHub<MessageHub>(app.Configuration["SignalR:Endpoint"]!);
         }
     }

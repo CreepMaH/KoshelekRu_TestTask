@@ -4,7 +4,7 @@ namespace TestTask.Domain.Interfaces
 {
     public interface IMessageDBRepository : IDisposable
     {
-        Task<OperationResult> Write(string message);
-        Task<Message> GetByTime(TimeSpan timeInterval);
+        Task<OperationResult> Write(Message message);
+        Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval);
     }
 }

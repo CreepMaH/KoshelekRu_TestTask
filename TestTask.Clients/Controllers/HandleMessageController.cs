@@ -11,6 +11,7 @@ namespace TestTask.Clients.Controllers
         {
             ViewData.Add("ReceiveMethodName", _configuration["SignalR:ReceiveMethodName"]);
             ViewData.Add("ServerHost", $"{_configuration["SignalR:ServerHost"]}");
+            ViewData.Add("ServerHostOuter", $"{_configuration["SignalR:ServerHostOuter"]}");
             ViewData.Add("Endpoint", $"{_configuration["SignalR:Endpoint"]}");
 
             return View();

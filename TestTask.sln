@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Server", "KoshelekRu_TestTask\TestTask.Server.csproj", "{8A343EAC-39DE-4655-B7CD-15C01BD2950D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Server", "TestTask.Server\TestTask.Server.csproj", "{8A343EAC-39DE-4655-B7CD-15C01BD2950D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Domain", "KoshelekRu_TestTask.Domain\TestTask.Domain.csproj", "{F810E1F8-BFF9-492A-AE14-8860E455E5EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Repository", "KoshelekRu_TestTask.Repository\TestTask.Repository.csproj", "{97A8FD1D-600D-4DF9-8E98-A2C24754C2B7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTask.Clients", "TestTask.Clients\TestTask.Clients.csproj", "{6A28D747-AC23-49CC-8025-752E4FE27C76}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{6A28D747-AC23-49CC-8025-752E4FE27C76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A28D747-AC23-49CC-8025-752E4FE27C76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A28D747-AC23-49CC-8025-752E4FE27C76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00B13A0D-C0D5-4FF7-B8FC-3A1098E9392A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,4 @@
 using TestTask.Clients.Services;
-using TestTask.Domain.Interfaces;
-using TestTask.Repository;
 
 namespace TestTask.Clients
 {
@@ -20,7 +18,6 @@ namespace TestTask.Clients
         private static void AddServices(WebApplicationBuilder builder)
         {
             builder.Services.AddControllersWithViews();
-            builder.Services.AddTransient<IMessageDBRepository, MessagePostgreSQL>();
             builder.Services.AddSingleton(serviceProvider =>
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<SignalRClient>>();
@@ -44,7 +41,7 @@ namespace TestTask.Clients
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseRouting();
 
             app.MapStaticAssets();
