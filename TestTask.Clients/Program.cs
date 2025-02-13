@@ -1,3 +1,4 @@
+using FluentValidation;
 using Scalar.AspNetCore;
 using TestTask.Clients.Services;
 using TestTask.Configuration.Services;
@@ -23,6 +24,11 @@ namespace TestTask.Clients
         {
             builder.Services.AddControllersWithViews();
             builder.Services.AddOpenApi();
+
+            builder.Services.AddValidatorsFromAssembly(
+                typeof(Program).Assembly,
+                includeInternalTypes: true);
+
 
             builder.Services.AddSingleton<IAppSettings, AppSettingsService>();
             builder.Services.AddSingleton<SignalRClient>(serviceProvider =>

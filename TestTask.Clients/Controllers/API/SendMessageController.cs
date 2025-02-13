@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using TestTask.Clients.Services;
 using TestTask.Domain.Extensions;
 using TestTask.Domain.Models;
@@ -24,15 +25,32 @@ namespace TestTask.Clients.Controllers.API
         /// <param name="messageText">Message</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<OperationResult> SendMessage(string user, string messageText)
+        public async Task<IActionResult> SendMessage(string user, string messageText, 
+            [FromServices] IValidator<Message> validator)
         {
-            string jsonMessage = new Message
+            var message = new Message
             {
                 Text = messageText,
                 IndexNumber = ++messagesCount
-            }.ToJsonString();
+            };
 
-            return await _hubClient.SendMessageAsync(user, jsonMessage);
+            var validationResult = validator.Validate(message);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+            string jsonMessage = message.ToJsonString();
+
+            var result = await _hubClient.SendMessageAsync(user, jsonMessage);
+            if (result.IsSuccess)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
         }
     }
 }
