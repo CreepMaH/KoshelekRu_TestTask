@@ -4,6 +4,9 @@ using TestTask.Domain.Models.AppSettings;
 
 namespace TestTask.Configuration.Services
 {
+    /// <summary>
+    /// Provides methods to get app configurations
+    /// </summary>
     public class AppSettingsService : IAppSettings
     {
         private readonly string _appSettingFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");

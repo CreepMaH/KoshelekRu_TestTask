@@ -3,7 +3,10 @@ using TestTask.Domain.Models;
 
 namespace TestTask.Domain.Extensions
 {
-    public static class JsonConversionExtensions
+    /// <summary>
+    /// Used to serialize and deserialize Message model
+    /// </summary>
+    public static class JsonModelConversionExtensions
     {
         public static string ToJsonString(this Message message)
         {

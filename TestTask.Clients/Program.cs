@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Scalar.AspNetCore;
 using TestTask.Clients.Services;
 using TestTask.Configuration.Services;
@@ -43,6 +42,7 @@ namespace TestTask.Clients
 
                 return client;
             });
+
             builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
             builder.Services.AddScoped<IMessageDBRepository>(serviceProvider =>
             {
@@ -72,7 +72,7 @@ namespace TestTask.Clients
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=HandleMessage}/{action=Index}/{id?}")
+                pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
         }
     }
