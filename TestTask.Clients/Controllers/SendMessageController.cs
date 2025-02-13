@@ -10,20 +10,47 @@ namespace TestTask.Clients.Controllers
     /// </summary>
     /// <param name="hubClient">SignalR client object</param>
     [Route("[controller]")]
+    [ApiController]
     public class SendMessageController(SignalRClient hubClient) 
         : Controller
     {
         private static ulong messagesCount = 0;
         private readonly SignalRClient _hubClient = hubClient;
 
-        /// <summary>
-        /// Shows a view to send a message to message service.
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult Index()
-        {
-            return View();
-        }
+        ///// <summary>
+        ///// Shows a view to send a message to message service.
+        ///// </summary>
+        ///// <returns></returns>
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
+
+        ///// <summary>
+        ///// Sends a message to message service. Redirects to an original view with a sending result.
+        ///// </summary>
+        ///// <param name="user">Username</param>
+        ///// <param name="messageText">Message</param>
+        ///// <returns></returns>
+        //[HttpPost]
+        //public async Task<IActionResult> SendMessage(string user, string messageText)
+        //{
+        //    string jsonMessage = new Message
+        //    {
+        //        Text = messageText,
+        //        IndexNumber = ++messagesCount
+        //    }.ToJsonString();
+
+        //    var result =  await _hubClient.SendMessageAsync(user, jsonMessage);
+
+        //    string sendingResult = result.IsSuccess 
+        //        ? $"Message \"{messageText}\" has been successfully sended"
+        //        : $"An error occured while sending. Text: {result.Message}";
+
+        //    TempData["SendingResult"] = sendingResult;
+
+        //    return RedirectToAction("Index");
+        //}
 
         /// <summary>
         /// Sends a message to message service. Redirects to an original view with a sending result.
@@ -32,7 +59,7 @@ namespace TestTask.Clients.Controllers
         /// <param name="messageText">Message</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> SendMessage(string user, string messageText)
+        public async Task<OperationResult> SendMessage(string user, string messageText)
         {
             string jsonMessage = new Message
             {
@@ -40,15 +67,7 @@ namespace TestTask.Clients.Controllers
                 IndexNumber = ++messagesCount
             }.ToJsonString();
 
-            var result =  await _hubClient.SendMessageAsync(user, jsonMessage);
-
-            string sendingResult = result.IsSuccess 
-                ? $"Message \"{messageText}\" has been successfully sended"
-                : $"An error occured while sending. Text: {result.Message}";
-
-            TempData["SendingResult"] = sendingResult;
-
-            return RedirectToAction("Index");
+            return await _hubClient.SendMessageAsync(user, jsonMessage);
         }
     }
 }

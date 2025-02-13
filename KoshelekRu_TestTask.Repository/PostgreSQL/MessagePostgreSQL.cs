@@ -36,15 +36,38 @@ namespace TestTask.Repository.PostgreSQL
             }
         }
 
-        public Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval)
+        public async Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval)
         {
-            throw new NotImplementedException();
+            using NpgsqlConnection conn = new(_connectionString);
+            await conn.OpenAsync();
+
+            DateTime minTime = DateTime.UtcNow.Subtract(timeInterval);
+            string commandText = $@"
+                SELECT * FROM {_messagesTableName}
+                WHERE TimeStamp > '{minTime}'";
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
+            using var sqlReader = await command.ExecuteReaderAsync();
+
+            List<Message> messages = [];
+            while (await sqlReader.ReadAsync())
+            {
+                var msg = new Message
+                {
+                    Id = (ulong)sqlReader.GetInt64(0),
+                    IndexNumber = (ulong)sqlReader.GetInt64(1),
+                    Text = sqlReader.GetString(2),
+                    TimeStamp = sqlReader.GetDateTime(3)
+                };
+                messages.Add(msg);
+            }
+
+            return messages;
         }
 
         public async Task<OperationResult> Write(Message message)
         {
             using NpgsqlConnection conn = new(_connectionString);
-            await conn!.OpenAsync();
+            await conn.OpenAsync();
 
             string commandText = @$"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
                 @$"VALUES ({message.IndexNumber}, '{message.Text}', '{message.TimeStamp}')"; //TODO: Переписать на параметры
@@ -68,7 +91,7 @@ namespace TestTask.Repository.PostgreSQL
         private async Task<bool> CheckIfDbExists()
         {
             using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
-            await conn!.OpenAsync();
+            await conn.OpenAsync();
 
             string commandText = @$"
                 SELECT EXISTS(
@@ -94,7 +117,7 @@ namespace TestTask.Repository.PostgreSQL
             try
             {
                 using NpgsqlConnection conn = new(_connectionString);
-                await conn!.OpenAsync();
+                await conn.OpenAsync();
 
                 string commandText = @$"
                     SELECT 1 
@@ -113,7 +136,7 @@ namespace TestTask.Repository.PostgreSQL
         private async Task CreateDb()
         {
             using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
-            await conn!.OpenAsync();
+            await conn.OpenAsync();
 
             string commandText = @$"CREATE DATABASE {_dbName};";  //TODO: Переписать на параметры
 
@@ -124,7 +147,7 @@ namespace TestTask.Repository.PostgreSQL
         private async Task CreateMessagesTable()
         {
             using NpgsqlConnection conn = new(_connectionString);
-            await conn!.OpenAsync();
+            await conn.OpenAsync();
 
             string commandText = $@"
                 CREATE TABLE {_messagesTableName}(

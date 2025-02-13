@@ -1,6 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
+using Scalar.AspNetCore;
 using TestTask.Clients.Services;
 using TestTask.Configuration.Services;
 using TestTask.Domain.Interfaces;
+using TestTask.Repository.PostgreSQL;
 
 namespace TestTask.Clients
 {
@@ -20,8 +23,10 @@ namespace TestTask.Clients
         private static void AddServices(WebApplicationBuilder builder)
         {
             builder.Services.AddControllersWithViews();
+            builder.Services.AddOpenApi();
+
             builder.Services.AddSingleton<IAppSettings, AppSettingsService>();
-            builder.Services.AddSingleton(serviceProvider =>
+            builder.Services.AddSingleton<SignalRClient>(serviceProvider =>
             {
                 var configs = serviceProvider.GetRequiredService<IAppSettings>()
                     .GetAppSettings();
@@ -38,6 +43,12 @@ namespace TestTask.Clients
 
                 return client;
             });
+            builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
+            builder.Services.AddScoped<IMessageDBRepository>(serviceProvider =>
+            {
+                var dbBuilder = serviceProvider.GetRequiredService<IMessageDBRepositoryBuilder<IMessageDBRepository>>();
+                return dbBuilder.Build().GetAwaiter().GetResult();
+            });
         }
 
         private static void ConfigureMiddleware(WebApplication app)
@@ -46,6 +57,15 @@ namespace TestTask.Clients
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.MapOpenApi();
+
+            var configs = app.Services.GetRequiredService<IAppSettings>()
+                .GetAppSettings();
+            app.MapScalarApiReference(options =>
+            {
+                options.AddServer(new ScalarServer(configs.ScalarSettings!.ClientUrl!));
+            });
 
             app.UseRouting();
 
