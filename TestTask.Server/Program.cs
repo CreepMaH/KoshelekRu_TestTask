@@ -25,10 +25,10 @@ namespace TestTask.Server
 
             builder.Services.AddSingleton<IAppSettings, AppSettingsService>();
             builder.Services.AddSingleton<IMessageDBRepositoryBuilder<IMessageDBRepository>, MessagePostgreSQLBuilder>();
-            builder.Services.AddSingleton<IMessageDBRepository>(serviceProvider =>
+            builder.Services.AddScoped<IMessageDBRepository>(serviceProvider =>
             {
-                var messageBuilder = serviceProvider.GetRequiredService<IMessageDBRepositoryBuilder<IMessageDBRepository>>();
-                return messageBuilder.Build().GetAwaiter().GetResult();
+                var dbBuilder = serviceProvider.GetRequiredService<IMessageDBRepositoryBuilder<IMessageDBRepository>>();
+                return dbBuilder.Build().GetAwaiter().GetResult();
             });
         }
         private static void ConfigureMiddleware(WebApplication app)

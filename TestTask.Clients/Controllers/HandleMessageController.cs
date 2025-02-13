@@ -3,6 +3,7 @@ using TestTask.Domain.Interfaces;
 
 namespace TestTask.Clients.Controllers
 {
+    [Route("[controller]")]
     public class HandleMessageController(IAppSettings appSettings) 
         : Controller
     {
