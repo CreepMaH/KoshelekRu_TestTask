@@ -4,14 +4,24 @@ using TestTask.Domain.Models;
 
 namespace TestTask.Repository.PostgreSQL
 {
+    /// <summary>
+    /// Provides methods to work with PostgreSQL DB using SQL queries
+    /// </summary>
+    /// <param name="appSettings">Settings containing DB configs</param>
     internal class MessagePostgreSQL(IAppSettings appSettings) : IMessageDBRepository
     {
+        private const string _postgresSysDbName = "postgres";
         private readonly IAppSettings _appSettings = appSettings;
 
+        private string? _initialConnectionString;
         private string? _connectionString;
         private string? _dbName;
         private string? _messagesTableName;
 
+        /// <summary>
+        /// Sets DB configs for the instance
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
         public void LoadAppSettings()
         {
             var settings = _appSettings.GetAppSettings();
@@ -22,8 +32,15 @@ namespace TestTask.Repository.PostgreSQL
                 ?? throw new ArgumentNullException(nameof(_dbName));
             _messagesTableName = settings.DBConfig.MessagesTableName
                 ?? throw new ArgumentNullException(nameof(_messagesTableName));
+
+            string[] connStrDivided = _connectionString.Split("Database=");
+            _initialConnectionString = $"{connStrDivided[0]}Database={_postgresSysDbName}";
         }
 
+        /// <summary>
+        /// Checks if the DB and the table for messages exist and creates them if not
+        /// </summary>
+        /// <returns></returns>
         public async Task InitDB()
         {
             if (!await CheckIfDbExists())
@@ -36,6 +53,11 @@ namespace TestTask.Repository.PostgreSQL
             }
         }
 
+        /// <summary>
+        /// Returns messages for the last [timeInterval]
+        /// </summary>
+        /// <param name="timeInterval">Interval</param>
+        /// <returns></returns>
         public async Task<IEnumerable<Message>> GetByTime(TimeSpan timeInterval)
         {
             using NpgsqlConnection conn = new(_connectionString);
@@ -64,6 +86,11 @@ namespace TestTask.Repository.PostgreSQL
             return messages;
         }
 
+        /// <summary>
+        /// Writes message to DB
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <returns></returns>
         public async Task<OperationResult> Write(Message message)
         {
             using NpgsqlConnection conn = new(_connectionString);
@@ -90,7 +117,7 @@ namespace TestTask.Repository.PostgreSQL
 
         private async Task<bool> CheckIfDbExists()
         {
-            using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            using NpgsqlConnection conn = new(_initialConnectionString);
             await conn.OpenAsync();
 
             string commandText = @$"
@@ -135,7 +162,7 @@ namespace TestTask.Repository.PostgreSQL
 
         private async Task CreateDb()
         {
-            using NpgsqlConnection conn = new("Host=postgres:5432;Username=koshelek;Password=koshelek.Ru@2025;Database=postgres");
+            using NpgsqlConnection conn = new(_initialConnectionString);
             await conn.OpenAsync();
 
             string commandText = @$"CREATE DATABASE {_dbName};";  //TODO: Переписать на параметры
@@ -168,6 +195,7 @@ namespace TestTask.Repository.PostgreSQL
                 CommandType = System.Data.CommandType.Text,
                 CommandText = commandText
             };
+
             return command;
         }
     }

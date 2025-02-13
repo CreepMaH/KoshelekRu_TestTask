@@ -6,6 +6,12 @@ using TestTask.Domain.Models;
 
 namespace TestTask.Server.Services
 {
+    /// <summary>
+    /// Provides methods to work with SignalR hub.
+    /// </summary>
+    /// <param name="logger">Instance for logging</param>
+    /// <param name="configuration">App settings with URLs</param>
+    /// <param name="dBRepository">Instance to work with DB repository</param>
     public class MessageHub(ILogger<MessageHub> logger, IAppSettings configuration, IMessageDBRepository dBRepository)
         : Hub
     {

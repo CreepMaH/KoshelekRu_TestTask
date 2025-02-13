@@ -3,6 +3,9 @@ using TestTask.Domain.Interfaces;
 
 namespace TestTask.Repository.PostgreSQL
 {
+    /// <summary>
+    /// Provides methods to build an IMessageDBRepository instance.
+    /// </summary>
     public class MessagePostgreSQLBuilder : IMessageDBRepositoryBuilder<IMessageDBRepository>
     {
         public async Task<IMessageDBRepository> Build()
