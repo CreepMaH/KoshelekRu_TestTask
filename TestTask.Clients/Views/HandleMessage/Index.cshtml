@@ -35,10 +35,24 @@
 
         connection.on('@ViewData["ReceiveMethodName"]', (user, message) => {
             const jsonMessage = JSON.parse(message);
+            const messageDate = new Date(jsonMessage.TimeStamp);
+            // const formattedDate = messageDate.getHours();
+            // console.log(formattedDate);
+            const formattedDate = messageDate.toLocaleString('ru-RU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
 
             const msgDiv = document.createElement("div");
             msgDiv.classList.add("message");
-            msgDiv.textContent = user + ": " + jsonMessage.Text;
+            msgDiv.textContent = user + ": "
+                + "(#" + jsonMessage.IndexNumber + ") "
+                + jsonMessage.Text
+                + " (" + formattedDate + ")";
             document.getElementById("messages").appendChild(msgDiv);
         });
 
