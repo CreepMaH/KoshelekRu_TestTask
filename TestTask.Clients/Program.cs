@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Scalar.AspNetCore;
 using TestTask.Clients.Services;
 using TestTask.Configuration.Services;
@@ -58,9 +59,13 @@ namespace TestTask.Clients
             }
 
             app.MapOpenApi();
+
+            var configs = app.Services.GetRequiredService<IAppSettings>()
+                .GetAppSettings();
             app.MapScalarApiReference(options =>
-                options.AddServer(new ScalarServer("http://localhost:7103"))
-                );
+            {
+                options.AddServer(new ScalarServer(configs.ScalarSettings!.ClientUrl!));
+            });
 
             app.UseRouting();
 
