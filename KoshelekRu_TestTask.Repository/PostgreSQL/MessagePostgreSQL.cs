@@ -67,6 +67,7 @@ namespace TestTask.Repository.PostgreSQL
             string commandText = $@"
                 SELECT * FROM {_messagesTableName}
                 WHERE TimeStamp > '{minTime}'";
+
             using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             using var sqlReader = await command.ExecuteReaderAsync();
 
@@ -97,10 +98,12 @@ namespace TestTask.Repository.PostgreSQL
             await conn.OpenAsync();
 
             string commandText = @$"INSERT INTO {_messagesTableName}(IndexNumber, Text, TimeStamp)" +
-                @$"VALUES ({message.IndexNumber}, '{message.Text}', '{message.TimeStamp}')"; //TODO: Переписать на параметры
-            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
-            using var sqlDataReader = await command.ExecuteReaderAsync();
+                @$"VALUES ({message.IndexNumber}, @text, '{message.TimeStamp}')";
 
+            using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
+            command.Parameters.AddWithValue("text", message.Text ?? string.Empty);
+
+            using var sqlDataReader = await command.ExecuteReaderAsync();
             bool isSuccess = sqlDataReader.RecordsAffected > 0;
 
             return new OperationResult
@@ -108,11 +111,6 @@ namespace TestTask.Repository.PostgreSQL
                 IsSuccess = isSuccess,
                 Message = $"The command has been executed with {sqlDataReader.RecordsAffected} rows affected"
             };
-        }
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
         }
 
         private async Task<bool> CheckIfDbExists()
@@ -125,7 +123,7 @@ namespace TestTask.Repository.PostgreSQL
                     SELECT 1 
                     FROM pg_database 
                     WHERE datname = '{_dbName}'
-                );";    //TODO: Переписать на параметры
+                );";
             using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
@@ -148,7 +146,7 @@ namespace TestTask.Repository.PostgreSQL
 
                 string commandText = @$"
                     SELECT 1 
-                    FROM {_messagesTableName};";    //TODO: Переписать на параметры
+                    FROM {_messagesTableName};";
 
                 using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
                 await command.ExecuteNonQueryAsync();
@@ -165,7 +163,7 @@ namespace TestTask.Repository.PostgreSQL
             using NpgsqlConnection conn = new(_initialConnectionString);
             await conn.OpenAsync();
 
-            string commandText = @$"CREATE DATABASE {_dbName};";  //TODO: Переписать на параметры
+            string commandText = @$"CREATE DATABASE {_dbName};";
 
             using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             _ = await command.ExecuteNonQueryAsync();
@@ -181,7 +179,7 @@ namespace TestTask.Repository.PostgreSQL
                     Id BIGSERIAL PRIMARY KEY,
                     IndexNumber BIGINT, 
                     Text CHARACTER VARYING(128), 
-                    TimeStamp TIMESTAMP)";  //TODO: Переписать на параметры
+                    TimeStamp TIMESTAMP)";
 
             using NpgsqlCommand command = CreateSqlCommand(commandText, conn);
             _ = await command.ExecuteNonQueryAsync();
